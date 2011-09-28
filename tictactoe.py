@@ -9,8 +9,8 @@
 # v2.1 - Computer plans its moves a little, but it isn't great (don't think it is possible to win 3x3)
 # v2.2 - Rewrote Some of the functions (CheckWin and CalculateDesire) Same functionality but cleaner code
 # v2.3 - Rewrote CalculateDesire again to account for multiple win/lose scenarios in the same line, will make future upgrades easier
-#	v2.4 - The Calculations are as good as I can get them, It would be fun if it could learn, but that seems beyond me. I don't think you can win without an early trick that is impossible to beat
-#
+#	v2.4 - The Calculations are as good as I can get them, It would be fun if it could learn, but that seems impossible. I don't think you can win without an early trick that is impossible to beat
+# v3.0 - Connect Four - AI not the best, still on tic tac toe. AI should think about building
 
 from Tkinter import *
 from random import *
@@ -244,7 +244,7 @@ def CalculateDesire(X,Y,Same):
 
 #################
 # For both the same type and opposite calculate all of the possible win/lose scenarios
-# 
+# Currently doesn't take empties spaces into account. 
 #
 
 		for OppType in [Same,Opposite]:
@@ -263,16 +263,20 @@ def CalculateDesire(X,Y,Same):
 				if j != WINNUM:
 					Count = 0
 
-				if OppType != Same and Count >= (SAMECOUNT**WINNUM):	#if there is an immediate win scenarion take it
+				if OppType != Same and Count >= (SAMECOUNT**WINNUM):	#if there is an immediate win/lose scenarion take it
 						print Line[i:i+j],":",Count
-						return(10000000)
+						return(1000000000*Continue+100000)
 
 				elif Count >= (OPPCOUNT**WINNUM):
-						print Line[i:i+j],":",Count		#if there is an immediate lose scenarion take it
-						return(100000)
+						print Line[i:i+j],":",Count
+						return(100000000*Continue)
+
 
 
 				Desire += Count**2
+
+		
+
 
 	return Desire
 
@@ -293,11 +297,14 @@ def AI(Canvas):
 	temptable = [] # temp
 	for i in range(PLAYSIZE):
 		temprow = []  #temp
-		for j in range(PLAYSIZE):
+		for j in range(PLAYSIZE): #temp
 			temprow.append(0)  #temp
-			if (Table[i][j] == EMPTY):
-				OpenSpaces.append((i,j))
 		temptable.append(temprow)   #temp
+		j = PLAYSIZE-1
+		while(Table[i][j] != EMPTY and j != 0):
+			j += -1
+		if Table[i][j] == EMPTY:
+			OpenSpaces.append((i,j))
 
 	if OpenSpaces == []:
 		print "Game Over!"
@@ -338,6 +345,13 @@ def play(event):
 	X = event.x
 	Y = event.y
 	Section = FindSection(X,Y)
+
+	j = PLAYSIZE-1
+	while(Table[Section[0]][j] != EMPTY and j != 0):
+		j += -1
+
+	Section[1] = j
+
 	LineX = SECTIONSIZE * Section[0]
 	LineY = SECTIONSIZE * Section[1]
 
@@ -358,6 +372,34 @@ def play(event):
 					redline(Canvas, Win[0], Win[1])
 
 
+################################
+#      
+# Bound to the R Mouse click, Interprets the rmouse click as cheat to calulate the desire of that spot
+# Inputs (event)
+# event - The Event generate by Tk
+#
+#
+
+def cheat(event):
+
+	global Previous
+	global Table
+	Canvas = event.widget
+	X = event.x
+	Y = event.y
+	Section = FindSection(X,Y)
+
+	j = PLAYSIZE-1
+	while(Table[Section[0]][j] != EMPTY and j != 0):
+		j += -1
+
+	Section[1] = j
+
+
+
+	if Table[Section[0]][Section[1]] == EMPTY:
+		print(CalculateDesire(Section[0],Section[1],CROSS))
+
 
 page = Canvas(root, width = BOARDSIZE, height = BOARDSIZE)
 page.grid()
@@ -367,6 +409,7 @@ for i in range(1,PLAYSIZE):
 	page.create_line(0, SECTIONSIZE*i,BOARDSIZE, SECTIONSIZE*i, width = 5)
 
 page.bind("<Button-1>", play)
+page.bind("<Button-3>", cheat)
 
 root.mainloop()
   
