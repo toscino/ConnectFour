@@ -265,11 +265,11 @@ def CalculateDesire(X,Y,Same):
 
 				if OppType != Same and Count >= (SAMECOUNT**WINNUM):	#if there is an immediate win/lose scenarion take it
 						print Line[i:i+j],":",Count
-						return(1000000000*Continue+100000)
+						return(1000000000+100000)
 
 				elif Count >= (OPPCOUNT**WINNUM):
 						print Line[i:i+j],":",Count
-						return(100000000*Continue)
+						return(100000000)
 
 
 
